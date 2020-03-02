@@ -1,6 +1,16 @@
 const graphql = require('graphql');
 const lodash = require('lodash');
-const { GraphQLObjectType, GraphQLString,GraphQLID,GraphQLInt,GraphQLList, GraphQLSchema } = graphql;
+const Book = require('../models/book');
+const Author = require('../models/author');
+
+const { 
+    GraphQLObjectType, 
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLSchema
+ } = graphql;
 var books = [
   { name: "jixnin", genre: "fantash", id: "1", authorId: "1" },
   { name: "jixnin1", genre: "fantash1", id: "4", authorId: "1" },
@@ -47,32 +57,65 @@ const AuthorType = new GraphQLObjectType({
 });
 
 const RootQuery = new GraphQLObjectType({
-    name:'RootQueryType',
+  name: "RootQueryType",
+  fields: {
+    book: {
+      type: BookType,
+      args: {
+        id: { type: GraphQLString }
+      },
+      resolve(parent, args) {
+        // get data from db
+        return lodash.find(books, { id: args.id });
+      }
+    },
+    author: {
+      type: AuthorType,
+      args: {
+        id: { type: GraphQLID }
+      },
+      resolve(parent, args) {
+        return lodash.find(authors, { id: args.id });
+      }
+    },
+    books: {
+      type: new GraphQLList(BookType),
+      resolve(parent, args) {
+        return books;
+      }
+    },
+    authors: {
+      type: new GraphQLList(AuthorType),
+      resolve(parent, args) {
+        return authors;
+      }
+    }
+  }
+});
+
+const Mutation = new GraphQLObjectType({
+    name:'Mutation',
     fields:{
-        book:{
-            type: BookType,
-            args:{
-                id:{type:GraphQLString}
-            },
-            resolve(parent,args){
-                // get data from db
-                return lodash.find(books,{id:args.id});
-            }
-        },
-        author:{
+        addAuthor:{
             type:AuthorType,
             args:{
-                id:{type:GraphQLID}
+                name:{type:GraphQLString},
+                age:{type:GraphQLInt}
             },
             resolve(parent,args){
-                return lodash.find(authors,{id:args.id})
+                // mogodb 的model
+                let author = new Author({
+                    name:args.name,
+                    age:args.age
+                })
+               return author.save()
             }
         }
     }
 })
 
-
 module.exports = new GraphQLSchema({
-    query:RootQuery
+    query:RootQuery,
+    mutation:Mutation
 })
 
