@@ -11,17 +11,7 @@ const {
     GraphQLList,
     GraphQLSchema
  } = graphql;
-var books = [
-  { name: "jixnin", genre: "fantash", id: "1", authorId: "1" },
-  { name: "jixnin1", genre: "fantash1", id: "4", authorId: "1" },
-  { name: "jixnin2", genre: "fantash2", id: "2", authorId: "2" },
-  { name: "jixnin3", genre: "fantash3", id: "3", authorId: "3" }
-];
-var authors = [
-  { name: "yuanshuzhi1", age: 30, id: "1" },
-  { name: "yuanshuzhi2", age: 31, id: "2" },
-  { name: "yuanshuzhi3", age: 32, id: "3" }
-];
+
 const BookType = new GraphQLObjectType({
   name: "Book",
   fields: () => ({
@@ -33,7 +23,8 @@ const BookType = new GraphQLObjectType({
         resolve(parent,args){
             //parent指的是book，按照数据的层级关系确定
            
-            return lodash.find(authors,{id:parent.authorId})
+            // return lodash.find(authors,{id:parent.authorId})
+            return Author.findById(parent.authorId);
         }
     }
   })
@@ -48,9 +39,10 @@ const AuthorType = new GraphQLObjectType({
     books: {
       type: new GraphQLList(BookType),
       resolve(parent,args){
-           console.log(1,parent);
-           console.log(books);
-          return lodash.filter(books, { authorId: parent.id });
+           console.log(parent, args);
+        //    console.log(books);
+        //   return lodash.filter(books, { authorId: parent.id });
+          return Book.find({ authorId: parent._id });
       }
     }
   })
@@ -66,7 +58,8 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve(parent, args) {
         // get data from db
-        return lodash.find(books, { id: args.id });
+        // return lodash.find(books, { id: args.id });
+        return Book.findById(args.id)
       }
     },
     author: {
@@ -75,44 +68,61 @@ const RootQuery = new GraphQLObjectType({
         id: { type: GraphQLID }
       },
       resolve(parent, args) {
-        return lodash.find(authors, { id: args.id });
+        // return lodash.find(authors, { id: args.id });
+         return Autor.findById(args.id);
       }
     },
     books: {
       type: new GraphQLList(BookType),
       resolve(parent, args) {
-        return books;
+        return Book.find({});
       }
     },
     authors: {
       type: new GraphQLList(AuthorType),
       resolve(parent, args) {
-        return authors;
+        return Author.find({});
       }
     }
   }
 });
 
 const Mutation = new GraphQLObjectType({
-    name:'Mutation',
-    fields:{
-        addAuthor:{
-            type:AuthorType,
-            args:{
-                name:{type:GraphQLString},
-                age:{type:GraphQLInt}
-            },
-            resolve(parent,args){
-                // mogodb 的model
-                let author = new Author({
-                    name:args.name,
-                    age:args.age
-                })
-               return author.save()
-            }
-        }
+  name: "Mutation",
+  fields: {
+    addAuthor: {
+      type: AuthorType,
+      args: {
+        name: { type: GraphQLString },
+        age: { type: GraphQLInt }
+      },
+      resolve(parent, args) {
+        // mogodb 的model
+        let author = new Author({
+          name: args.name,
+          age: args.age
+        });
+        return author.save();
+      }
+    },
+    addBook: {
+      type: BookType,
+      args: {
+        name: { type: GraphQLString },
+        genre: { type: GraphQLString },
+        authorId:{type:GraphQLID}
+      },
+      resolve(parent,args){
+          let book = new Book({
+              name:args.name,
+              genre:args.genre,
+              authorId:args.authorId
+          })
+          return book.save()
+      }
     }
-})
+  }
+});
 
 module.exports = new GraphQLSchema({
     query:RootQuery,
