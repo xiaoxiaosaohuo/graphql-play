@@ -34,7 +34,7 @@ const BookType = new GraphQLObjectType({
 const AuthorType = new GraphQLObjectType({
   name: "Author",
   fields: () => ({
-    id: { type: GraphQLID },
+    _id: { type: GraphQLID },
     name: { type: GraphQLString },
     age: { type: GraphQLInt },
     books: {
@@ -70,7 +70,7 @@ const RootQuery = new GraphQLObjectType({
       },
       resolve(parent, args) {
         // return lodash.find(authors, { id: args.id });
-         return Autor.findById(args.id);
+         return Autor.findById(args._id);
       }
     },
     books: {
@@ -119,6 +119,7 @@ const Mutation = new GraphQLObjectType({
           genre: args.genre,
           authorId: args.authorId
         });
+        console.log(book)
         return book.save();
       }
     }
