@@ -1,2 +1,0 @@
-# grapql-play
- learn graphql
