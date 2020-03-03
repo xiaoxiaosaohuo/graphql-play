@@ -2,10 +2,10 @@ const express = require("express");
 const graphqlHttp = require("express-graphql");
 const schema = require('./schema/schema.js');
 const mongoose = require('mongoose');
-
+const cors = require('cors');
 const app = express();
 // 连接数据库
-
+app.use(cors()); //跨域
 mongoose.connect(
   "mongodb://graph:jinxin479@ds111565.mlab.com:11565/jinxin"
 );
