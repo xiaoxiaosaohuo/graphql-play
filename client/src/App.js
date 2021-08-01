@@ -1,28 +1,33 @@
-import React, { Component } from 'react';
-import ApolloClient from 'apollo-boost';
-import { ApolloProvider } from 'react-apollo';
+import logo from './logo.svg';
+import './App.css';
+import Nav from './components/Nav/Nav';
+import { Switch, Route, BrowserRouter } from "react-router-dom"
+import LandingPage from './pages/LandingPage';
+import CategoryPage from './pages/CategoryPage';
+import AnimalPage from './pages/AnimalPage/AnimalPage';
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
-// components
-import BookList from './components/BookList';
-import AddBook from './components/AddBook';
-
-// apollo client setup
 const client = new ApolloClient({
-    uri: 'http://localhost:4000/graphql'
-});
+  uri: "http://localhost:4000",
+  cache: new InMemoryCache()
+})
 
-class App extends Component {
-  render() {
-    return (
-        <ApolloProvider client={client}>
-            <div id="main">
-                <h1>Ninja's Reading List</h1>
-                <BookList />
-                <AddBook />
-            </div>
-        </ApolloProvider>
-    );
-  }
+function App() {
+  console.log("app",client)
+  return (
+    <div className="App">
+      <ApolloProvider client={client}>
+        <BrowserRouter>
+            <Nav />
+            <Switch>
+              <Route exact strict path="/" component={LandingPage}/>
+              <Route exact strict path="/products/:slug" component={CategoryPage}/>
+              <Route exact strict path="/product/:slug" component={AnimalPage}/>
+            </Switch>
+        </BrowserRouter>
+      </ApolloProvider>
+    </div>
+  );
 }
 
 export default App;

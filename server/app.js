@@ -1,27 +1,27 @@
-const express = require('express');
-const graphqlHTTP = require('express-graphql');
-const schema = require('./schema/schema');
-const mongoose = require('mongoose');
-const cors = require('cors');
+const { ApolloServer } = require("apollo-server");
+const { mainCards, animals, categories } = require("./db");
+const typeDefs = require("./schema/schema");
+const Query = require("./resolvers/Query");
+const Mutation = require("./resolvers/Mutation");
+const Animal = require("./resolvers/Animal");
+const Category = require("./resolvers/Category");
 
-const app = express();
-
-// allow cross-origin requests
-app.use(cors());
-
-// connect to mlab database
-// make sure to replace my db string & creds with your own
-mongoose.connect('mongodb://ninja:test@ds161148.mlab.com:61148/graphql-ninja')
-mongoose.connection.once('open', () => {
-    console.log('conneted to database');
+const server = new ApolloServer({
+  typeDefs,
+  resolvers: {
+    Query,
+    Mutation,
+    // Animal,
+    Category
+  },
+  context: {
+    mainCards,
+    animals,
+    categories
+  }
 });
 
-// bind express with graphql
-app.use('/graphql', graphqlHTTP({
-    schema,
-    graphiql: true
-}));
-
-app.listen(4000, () => {
-    console.log('now listening for requests on port 4000');
+// The `listen` method launches a web server.
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
 });
