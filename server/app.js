@@ -11,7 +11,7 @@ const server = new ApolloServer({
   resolvers: {
     Query,
     Mutation,
-    // Animal,
+    Animal,
     Category
   },
   context: {
